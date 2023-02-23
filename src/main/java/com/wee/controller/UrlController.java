@@ -46,7 +46,7 @@ public class UrlController {
 	
 	
 	@GetMapping("{hash}")
-	void redirect(@PathVariable("hash") String hash, HttpServletRequest request, HttpServletResponse httpServletResponse,@RequestHeader("User-Agent") String userAgent) {
+	void redirect(@PathVariable("hash") String hash,HttpServletResponse httpServletResponse,@RequestHeader("User-Agent") String userAgent) {
 		LOGGER.info("Redirect request recieved for hash:  "+hash+ " with user-Agent: "+userAgent);
 		Optional<Url> oUrl = urlService.findByHash(hash);
 //		urlClickService.save(userAgent, hash);
