@@ -5,6 +5,7 @@ package com.wee.service;
 
 import java.util.Optional;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -21,7 +22,7 @@ import com.wee.util.Commons;
  */
 @Service
 public class UrlServiceImpl implements UrlService{
-
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(UrlClickServiceImpl.class);
 	@Autowired
 	UrlRepo urlRepo;
 	@Autowired UrlMapper urlMapper;
@@ -53,7 +54,9 @@ public class UrlServiceImpl implements UrlService{
 		url.setHash(hash);
 		try {
 			urlRepo.save(url);
+			LOGGER.info("Saved tiny url for url: "+url+" successfully");
 		}catch (DataIntegrityViolationException e) {
+			LOGGER.error("Failed to save tiny url for url: "+url);
 			return generateTinyUrl(url);
 		}
 		return hash;

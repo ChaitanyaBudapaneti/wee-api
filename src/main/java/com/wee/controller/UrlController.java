@@ -11,6 +11,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -38,26 +39,22 @@ import com.wee.util.Commons;
 @RestController
 @RequestMapping("/")
 public class UrlController {
+	private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(UrlController.class);
 	
 	@Autowired UrlService urlService;
 	@Autowired UrlClickService urlClickService;
 	
 	
 	@GetMapping("{hash}")
-	void redirect(@PathVariable("hash") String hash, HttpServletRequest request, HttpServletResponse httpServletResponse,@RequestHeader("User-Agent") String userAgent, @RequestHeader("X-Forwarded-For") String xForwardedForHeader) {
+	void redirect(@PathVariable("hash") String hash, HttpServletRequest request, HttpServletResponse httpServletResponse,@RequestHeader("User-Agent") String userAgent) {
+		LOGGER.info("Redirect request recieved for hash:  "+hash+ " with user-Agent: "+userAgent);
 		Optional<Url> oUrl = urlService.findByHash(hash);
 //		urlClickService.save(userAgent, hash);
-		    String userIp =null;
-		    if (xForwardedForHeader == null) {
-		        userIp =  request.getRemoteAddr();
-		    } 
-		    else {
-		        userIp =  new StringTokenizer(xForwardedForHeader, ",").nextToken().trim();
-		    }
-		 
+		
 		oUrl.ifPresent(url->{
 		    httpServletResponse.setHeader("Location", url.getOriginalUrl());
 		    httpServletResponse.setStatus(302);
+		    LOGGER.info("Redirected request for hash:  "+hash+ " with user-Agent: "+userAgent);
 		});
 		
 	}
@@ -65,6 +62,7 @@ public class UrlController {
 	
 	@GetMapping("c/{hash}")
 	void redirectWithClickId(@PathVariable("hash") String hash, HttpServletResponse httpServletResponse,@RequestHeader("User-Agent") String userAgent) {
+		LOGGER.info("Redirect request recieved to store clickID for hash:  "+hash+ " with user-Agent: "+userAgent);
 		Optional<Url> oUrl = urlService.findByHash(hash);
 //		urlClickService.save(userAgent, hash);
 		oUrl.ifPresent(url->{
@@ -73,6 +71,7 @@ public class UrlController {
 			finalURL = finalURL.replace("%7Bepoch%7D", new Date().getTime()+ "");
 		    httpServletResponse.setHeader("Location", finalURL);
 		    httpServletResponse.setStatus(302);
+		    LOGGER.info("Redirected request to store clickID for hash:  "+hash+ " with user-Agent: "+userAgent);
 		});
 		
 	}
@@ -85,10 +84,13 @@ public class UrlController {
 	@CrossOrigin(origins = "http://localhost:3000")
 	@PostMapping(path= "", consumes = "application/json", produces = "text/plain")
 	ResponseEntity<String> create(@RequestBody Url url) {
+		LOGGER.info("Create request recieved for url:  "+url);
 		if(Commons.isValidURL(url.getOriginalUrl())) {
 			if(url.getOriginalUrl().length() > 2000)
 				return new ResponseEntity<String>("max length exceeded", HttpStatus.BAD_REQUEST);
 			String shortURL = urlService.create(url);
+
+			LOGGER.info("Create request recieved for url:  "+url+" processed successfully");
 			return new ResponseEntity<String>(shortURL, HttpStatus.CREATED);
 		}
 		return new ResponseEntity<String>("invalid URL", HttpStatus.BAD_REQUEST);		

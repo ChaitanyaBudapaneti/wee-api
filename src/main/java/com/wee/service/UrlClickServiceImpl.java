@@ -51,6 +51,7 @@ public class UrlClickServiceImpl implements UrlClickService{
 			urlClick.setCreatedTs(new Timestamp(new Date().getTime()));
 			urlClick.setId(UUID.randomUUID());
 			urlClick = urlClickRepo.save(urlClick);
+			LOGGER.info("saved url click data for urlId: "+urlId+" successfully");
 			
 		} catch (IOException | ParseException e) {
 			LOGGER.error("unable to save urlClick ", e);
