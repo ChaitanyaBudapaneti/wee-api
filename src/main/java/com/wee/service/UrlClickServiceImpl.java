@@ -38,7 +38,6 @@ public class UrlClickServiceImpl implements UrlClickService{
 	 * @see com.wee.service.UrlClickService#save(com.wee.entity.UrlClick)
 	 */
 	@Override
-	@Async
 	public UrlClick save(String userAgent, String urlId) {
 		UrlClick urlClick = null;
 		try {
